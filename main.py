@@ -1,13 +1,10 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import speech_recognition as sr
-from gtts import gTTS
 import pyttsx3
-import json
-import os
 
-SPOTIPY_CLIENT_ID='99093c5eb63d4e07bbbcf8bd05473b1f'
-SPOTIPY_CLIENT_SECRET = 'fa4815464612490c8b4ae10d14e47b32'
+SPOTIPY_CLIENT_ID=''
+SPOTIPY_CLIENT_SECRET = ''
 SPOTIPY_REDIRECT_URI = 'http://127.0.0.1:8080/'
 voice = pyttsx3.init()
 language = 'en'
@@ -32,7 +29,7 @@ Parameters: None
 Output: string
 Purpose: The purpose of this function is to listen to the user and return it as a string
          If there is an error then the function will return "-1"
-         If the mike is not connected it will tell the user to connect a mike and end the program
+         If the mic is not connected it will tell the user to connect a mike and end the program
 Author: Saad Ahmed
 """
 def user_ans():
@@ -83,71 +80,99 @@ def mic_connected():
     except:
         speak("Sorry you do not have a default mike. The program is going to stop. Please connect a mike and restart the program.")
         exit()
-
 """
 Name: create_playlist
-Parameters: None
+Parameters: spotifyObject, string
 Output: None
 Purpose: The purose of this function is to create a playlist
 Author: Saad Ahmed
 """
-def create_playlist():
+def create_playlist(spotifyObject,username):
     playlist_name = valid_ans('Enter a playlist name')
     playlist_description = valid_ans('Enter a playlist description')
     spotifyObject.user_playlist_create(user=username,name=playlist_name,public=True,description=playlist_description)
 
 """
 Name: get_songs
-Parameters: None
+Parameters: spotifyObject
 Output: string []
 Purpose: The purpose of this function is to get a list of songs that the user wants to add to their playlist and return it
 Author: Saad Ahmed
 """
-def get_songs():
+def get_songs(spotify_object):
     song = valid_ans('Enter the song or say quit to exit')
     list_of_songs = []
     while song != 'quit':
-        result = spotifyObject.search(q=song)
+        result = spotify_object.search(q=song)
         list_of_songs.append(result['tracks']['items'][0]['uri'])
         song = valid_ans('Enter the song or say quit to exit')
     return list_of_songs
 
 """
 Name: add_to_playlist
-Parameters: string[]
+Parameters: string[], spotifyObject, string
 Output: boolean
 Purpose: The purpose of this function is to add the list of songs passed through the parameter to the playlist
 Author: Saad Ahmed
 """
-def add_to_playlist(list_of_songs):
-    prePlaylist = spotifyObject.user_playlists(user=username)
-    playlist = prePlaylist['items'][0]['id']
-    spotifyObject.user_playlist_add_tracks(user=username, playlist_id=playlist, tracks=list_of_songs)
+def add_to_playlist(list_of_songs,spotify_object,username):
+    pre_playlist = spotify_object.user_playlists(user=username)
+    playlist = pre_playlist['items'][0]['id']
+    spotify_object.user_playlist_add_tracks(user=username, playlist_id=playlist, tracks=list_of_songs)
     return True
 """
 Name: create_spotify_object
-Parameters: None
-Output: object
+Parameters: string
+Output: string, object
 Purpose: This function get the username of the user and creates a spotify object
+Author: Saad Ahmed
 """
-def create_spotify_object():
+def create_spotify_object(username):
+    try:
+        token = SpotifyOAuth(client_secret=SPOTIPY_CLIENT_SECRET, scope=scope, redirect_uri=SPOTIPY_REDIRECT_URI,
+                             username=username, client_id=SPOTIPY_CLIENT_ID)
+        return spotipy.Spotify(auth_manager=token)
+    except:
+        speak("Sorry, I was unable to find that account. Please try again.")
+        return None
+
+"""
+Name: valid_account
+Parameters: None
+Output: string, object
+Purpose: This function checks if the account name that the user gave exists. If it is invalide then it continuously loops until 
+         the user gives a valid username
+Author: Saad Ahmed
+"""
+def valid_account():
+    username = get_user_name()
+    spotify_object = create_spotify_object(username)
+    while spotify_object == None:
+        username = get_user_name()
+        spotify_object = create_spotify_object(username)
+    return username, spotify_object
+"""
+Name: get_user_name
+Parameters: None
+Output: string
+Purpose: The purpose of this function is to get the user's user name and return it
+Author: Saad Ahmed
+"""
+def get_user_name():
     speak("Please enter your spotify username")
-    username = input("Pleas enter your spotify username: ")
-    token = SpotifyOAuth(client_secret=SPOTIPY_CLIENT_SECRET, scope=scope, redirect_uri=SPOTIPY_REDIRECT_URI,
-                         username=username, client_id=SPOTIPY_CLIENT_ID)
-    return spotipy.Spotify(auth_manager=token)
+    return input("Pleas enter your spotify username: ")
 """
 Name: main
 Parameters: None
 Output: None
-Purpose: This is the main function. It acts like a conductor. The function uses other functions to create the functionality of the program
+Purpose: This is the main function. It acts like a conductor. The function uses other functions to create the functionality of the program.
 Author: Saad Ahmed
 """
 def main():
     mic_connected()
-    spotifyObject = create_spotify_object()
-    create_playlist()
-    add_to_playlist(get_songs())
+    username, spotify_object = valid_account()
+    create_playlist(spotify_object,username)
+    add_to_playlist(get_songs(spotify_object),spotify_object,username)
 
 
 
