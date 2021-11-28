@@ -82,19 +82,19 @@ def mic_connected():
         exit()
 """
 Name: create_playlist
-Parameters: spotifyObject, string
+Parameters: spotify_object, string
 Output: None
 Purpose: The purose of this function is to create a playlist
 Author: Saad Ahmed
 """
-def create_playlist(spotifyObject,username):
+def create_playlist(spotify_object,username):
     playlist_name = valid_ans('Enter a playlist name')
     playlist_description = valid_ans('Enter a playlist description')
-    spotifyObject.user_playlist_create(user=username,name=playlist_name,public=True,description=playlist_description)
+    spotify_object.user_playlist_create(user=username,name=playlist_name,public=True,description=playlist_description)
 
 """
 Name: get_songs
-Parameters: spotifyObject
+Parameters: spotify_object
 Output: string []
 Purpose: The purpose of this function is to get a list of songs that the user wants to add to their playlist and return it
 Author: Saad Ahmed
@@ -110,7 +110,7 @@ def get_songs(spotify_object):
 
 """
 Name: add_to_playlist
-Parameters: string[], spotifyObject, string
+Parameters: string[], spotify_object, string
 Output: boolean
 Purpose: The purpose of this function is to add the list of songs passed through the parameter to the playlist
 Author: Saad Ahmed
