@@ -1,6 +1,6 @@
 NOTE (IMPORTANT): The client ID and the Client Secret is missing due to privacy issues; thus, the current version of the program will not work.
 If you want to use the project, please go to spotify developer page and register for a new app and fill in the information.
-Please search for a tutorial on google should encounter more problems.
+Please search for a tutorial on google should encounter problems.
 
 
 Instructions:
